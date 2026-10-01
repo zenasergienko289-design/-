@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FunPay</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<main id="screen" class="screen">
+
+    <!-- ============ СДЕЛКИ (главная) ============ -->
+    <section id="tab-deals" class="tab-screen active">
+        <div class="banner-carousel">
+            <img src="static/img/banner1.jpg" alt="" class="banner-slide active" />
+            <img src="static/img/banner2.jpg" alt="" class="banner-slide" />
+            <div class="banner-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+
+        <h1 class="page-title">Мои сделки</h1>
+
+        <button class="btn btn-blue big" onclick="openCreateDeal()">
+            <img src="static/icons/btn-create.png" class="btn-img" alt="" />
+            Создать сделку
+        </button>
+        <button class="btn btn-blue big" onclick="scrollToDeals()">
+            <img src="static/icons/btn-active.png" class="btn-img" alt="" />
+            Активные сделки
+        </button>
+        <button class="btn btn-white big" onclick="alert('История сделок — скоро')">
+            <img src="static/icons/btn-history.png" class="btn-img" alt="" />
+            История сделок
+        </button>
+        <button class="btn btn-white big" onclick="openReviews()">
+            <img src="static/icons/btn-reviews.png" class="btn-img" alt="" />
+            Отзывы о сделках
+        </button>
+
+        <div id="deals-list" class="deals-list">
+            <div class="empty">Загрузка…</div>
+        </div>
+    </section>
+
+    <!-- ============ КОШЕЛЬКИ ============ -->
+    <section id="tab-wallets" class="tab-screen">
+        <h1 class="page-title">Мои кошельки</h1>
+
+        <div class="cur-pills">
+            <button class="cur-pill active" data-cur="TON">💎 TON</button>
+            <button class="cur-pill" data-cur="USDT">💵 USDT</button>
+            <button class="cur-pill" data-cur="STARS">⭐ STARS</button>
+            <button class="cur-pill" data-cur="RUB">₽ RUB</button>
+            <button class="cur-pill" data-cur="KZT">₸ KZT</button>
+            <button class="cur-pill" data-cur="UAH">₴ UAH</button>
+            <button class="cur-pill" data-cur="USD">$ USD</button>
+            <button class="cur-pill" data-cur="BTC">₿ BTC</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Мой кошелёк</div>
+            <div class="input-group">
+                <label id="wallet-label">TON Кошелёк</label>
+                <input id="wallet-input" placeholder="UQ…" />
+            </div>
+            <button class="btn btn-blue big" onclick="saveWallet()">
+                <span class="ico" id="wallet-ico">💎</span>
+                <span id="wallet-btn-text">Подключить TON кошелёк</span>
+            </button>
+        </div>
+
+        <button class="btn btn-blue big" onclick="alert('Пополнение — через поддержку в боте')">
+            <span class="ico">↓</span> Пополнение
+        </button>
+        <button class="btn btn-white big" onclick="alert('Вывод — через поддержку в боте')">
+            <span class="ico">↓</span> Вывести
+        </button>
+    </section>
+
+    <!-- ============ ЛИДЕРЫ ============ -->
+    <section id="tab-leaders" class="tab-screen">
+        <h1 class="page-title">Лидеры</h1>
+
+        <div class="leaders-hero">
+            <div class="leaders-emoji">💵</div>
+            <div class="leaders-prize">$50 000</div>
+            <div class="leaders-sub">Топ-20 участников по объёму сделок разделят призовой фонд</div>
+        </div>
+
+        <div class="card center">
+            <div class="dim small">До старта</div>
+            <div class="timer">
+                <div><b id="t-d">00</b><span>дней</span></div>
+                <div><b id="t-h">00</b><span>часов</span></div>
+                <div><b id="t-m">00</b><span>минут</span></div>
+                <div><b id="t-s">00</b><span>секунд</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="dim small">МЕСТА</div>
+            <div class="places">
+                <div class="place blue">
+                    <div class="small">1 место</div>
+                    <div class="place-prize">$10K</div>
+                </div>
+                <div class="place">
+                    <div class="small">2 место</div>
+                    <div class="place-prize">$5K</div>
+                </div>
+                <div class="place">
+                    <div class="small">3 место</div>
+                    <div class="place-prize">$3K</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title blue big">$5 000</div>
+            <div class="pill-small">Бонус новичкам</div>
+            <div class="bold">Сделай первую сделку — гарантированно получи долю</div>
+            <div class="dim small">
+                $5 000 разделим между всеми, кто проведёт хотя бы одну сделку до конца сезона.
+                Одна сделка = гарантированная награда.
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="dim small">ОСТАЛЬНЫЕ МЕСТА</div>
+            <div class="row-between">
+                <b>4–10</b>
+                <b>$12K</b>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Топ по сделкам</div>
+            <div id="leaders-list" class="leaders-list">
+                <div class="empty">Загрузка…</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ПРОФИЛЬ ============ -->
+    <section id="tab-profile" class="tab-screen">
+        <h1 class="page-title">Профиль</h1>
+
+        <div class="profile-top">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-name" id="prof-name">…</div>
+            <div class="profile-id" id="prof-id">@…</div>
+        </div>
+
+        <div class="row-2">
+            <button class="btn btn-blue big" onclick="showTransactions()">
+                <span class="ico">🕒</span> Транзакции
+            </button>
+            <button class="btn btn-white big" onclick="showLangPicker()">
+                <span class="ico">🌐</span> Языки
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="row-between">
+                <div class="card-title">Балансы</div>
+                <label class="switch">
+                    <input type="checkbox" id="hide-zero" />
+                    <span class="slider"></span>
+                    <span class="small dim">Скрыть нулевые</span>
+                </label>
+            </div>
+            <div id="balances-list" class="balances-list">
+                <div class="empty">Загрузка…</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Реквизиты для вывода</div>
+            <div class="input-group">
+                <label>TON-кошелёк</label>
+                <input id="det-ton" placeholder="UQ…" />
+            </div>
+            <div class="input-group">
+                <label>Карта</label>
+                <input id="det-card" placeholder="0000 0000 0000 0000" />
+            </div>
+            <div class="input-group">
+                <label>@username (Stars)</label>
+                <input id="det-stars" placeholder="username" />
+            </div>
+            <div class="input-group">
+                <label>USDT (TRC20)</label>
+                <input id="det-usdt" placeholder="T…" />
+            </div>
+            <div class="input-group">
+                <label>BTC</label>
+                <input id="det-btc" placeholder="bc1…" />
+            </div>
+            <button class="btn btn-blue big" onclick="saveDetails()">Сохранить</button>
+        </div>
+    </section>
+
+
+    <!-- ============ ОТЗЫВЫ ============ -->
+    <section id="tab-reviews" class="tab-screen">
+        <h1 class="page-title">Отзывы</h1>
+        <div class="card" id="reviews-stats">
+            <div class="empty">Загрузка…</div>
+        </div>
+        <div id="reviews-list" class="reviews-list">
+            <div class="empty">Загрузка…</div>
+        </div>
+        <button class="btn btn-white big" onclick="switchTab('deals')">← Назад к сделкам</button>
+    </section>
+
+</main>
+
+<!-- ============ НИЖНЯЯ НАВИГАЦИЯ ============ -->
+<nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="deals" onclick="switchTab('deals')">
+        <img src="static/icons/nav-deals.png" alt="" class="nav-img" />
+        <span>Сделки</span>
+    </button>
+    <button class="nav-btn" data-tab="wallets" onclick="switchTab('wallets')">
+        <img src="static/icons/nav-wallets.png" alt="" class="nav-img" />
+        <span>Кошельки</span>
+    </button>
+    <button class="nav-btn" data-tab="leaders" onclick="switchTab('leaders')">
+        <img src="static/icons/nav-leaders.png" alt="" class="nav-img" />
+        <span>Лидеры</span>
+    </button>
+    <button class="nav-btn" data-tab="profile" onclick="switchTab('profile')">
+        <img src="static/icons/nav-profile.png" alt="" class="nav-img" />
+        <span>Профиль</span>
+    </button>
+</nav>
+
+<!-- ============ МОДАЛКА: создать сделку ============ -->
+<div id="modal-create" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-title">Создать сделку</div>
+
+        <div class="input-group">
+            <label>Я продавец / покупатель</label>
+            <select id="deal-role">
+                <option value="seller">Я продавец</option>
+                <option value="buyer">Я покупатель</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Валюта</label>
+            <select id="deal-currency">
+                <option>RUB</option><option>KZT</option><option>UAH</option>
+                <option>USD</option><option>USDT</option><option>TON</option>
+                <option>BTC</option><option>STR</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Сумма</label>
+            <input id="deal-amount" type="number" placeholder="1000" />
+        </div>
+
+        <div class="input-group">
+            <label>Описание</label>
+            <textarea id="deal-desc" placeholder="Что продаём?"></textarea>
+        </div>
+
+        <button class="btn btn-blue big" onclick="submitCreateDeal()">Создать</button>
+        <button class="btn btn-white big" onclick="closeCreateDeal()">Отмена</button>
+    </div>
+</div>
+
+<!-- ============ МОДАЛКА: транзакции ============ -->
+<div id="modal-tx" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-title">Транзакции</div>
+        <div id="tx-list" class="tx-list"><div class="empty">Загрузка…</div></div>
+        <button class="btn btn-white big" onclick="closeTx()">Закрыть</button>
+    </div>
+</div>
+
+<!-- ============ МОДАЛКА: языки ============ -->
+<div id="modal-lang" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-title">Выберите язык</div>
+        <button class="btn btn-white big" onclick="setLang('ru')">🇷🇺 Русский</button>
+        <button class="btn btn-white big" onclick="setLang('en')">🇬🇧 English</button>
+        <button class="btn btn-white big" onclick="setLang('zh')">🇨🇳 中文</button>
+        <button class="btn btn-white big" onclick="closeLang()">Отмена</button>
+    </div>
+</div>
+
+
+<!-- ============ МОДАЛКА: детали сделки ============ -->
+<div id="modal-deal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-title">Сделка</div>
+        <div id="deal-detail-body"><div class="empty">Загрузка…</div></div>
+    </div>
+</div>
+
+<script src="static/app.js"></script>
+</body>
+</html>
