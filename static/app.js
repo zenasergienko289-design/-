@@ -74,7 +74,7 @@ function showToast(text, duration = 2000) {
 // =====================================================
 // API
 // =====================================================
-const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
+const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";;
 const DEFAULT_BOT_USERNAME = "papagaratbot";
 
 function initData() {
