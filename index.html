@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FunPay</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<main id="screen" class="screen">
+
+    <!-- ============ СДЕЛКИ (главная) ============ -->
+    <section id="tab-deals" class="tab-screen active">
+        <div class="banner-carousel">
+            <img src="static/img/banner1.jpg" alt="" class="banner-slide active" />
+            <img src="static/img/banner2.jpg" alt="" class="banner-slide" />
+            <div class="banner-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+
+        <h1 class="page-title">Мои сделки</h1>
+
+        <button class="btn btn-blue big" onclick="openCreateFlow()">
+            <img src="static/icons/btn-create.png" class="btn-img" alt="" />
+            Создать сделку
+        </button>
+        <button class="btn btn-blue big" onclick="scrollToDeals()">
+            <img src="static/icons/btn-active.png" class="btn-img" alt="" />
+            Активные сделки
+        </button>
+        <button class="btn btn-white big" onclick="alert('История сделок — скоро')">
+            <img src="static/icons/btn-history.png" class="btn-img" alt="" />
+            История сделок
+        </button>
+        <button class="btn btn-white big" onclick="openReviews()">
+            <img src="static/icons/btn-reviews.png" class="btn-img" alt="" />
+            Отзывы о сделках
+        </button>
+
+        <div id="deals-list" class="deals-list">
+            <div class="empty">Загрузка…</div>
+        </div>
+    </section>
+
+    <!-- ============ КОШЕЛЬКИ ============ -->
+    <section id="tab-wallets" class="tab-screen">
+        <h1 class="page-title">Мои кошельки</h1>
+
+        <div class="cur-pills">
+            <button class="cur-pill active" data-cur="TON"><img src="static/icons/toncoin.png" class="pill-img" alt="" /> TON</button>
+            <button class="cur-pill" data-cur="USDT"><img src="static/icons/usdt.png" class="pill-img" alt="" /> USDT</button>
+            <button class="cur-pill" data-cur="STARS">⭐ STARS</button>
+            <button class="cur-pill" data-cur="RUB">₽ RUB</button>
+            <button class="cur-pill" data-cur="KZT">₸ KZT</button>
+            <button class="cur-pill" data-cur="UAH">₴ UAH</button>
+            <button class="cur-pill" data-cur="USD">$ USD</button>
+            <button class="cur-pill" data-cur="BTC">₿ BTC</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Мой кошелёк</div>
+            <div class="input-group">
+                <label id="wallet-label">TON Кошелёк</label>
+                <input id="wallet-input" placeholder="UQ…" />
+            </div>
+            <button class="btn btn-blue big" onclick="saveWallet()">
+                <span id="wallet-btn-text">Подключить TON кошелёк</span>
+            </button>
+        </div>
+
+        <button class="btn btn-blue big" onclick="alert('Пополнение — через поддержку в боте')">
+            <span class="ico">↓</span> Пополнение
+        </button>
+        <button class="btn btn-white big" onclick="alert('Вывод — через поддержку в боте')">
+            <span class="ico">↓</span> Вывести
+        </button>
+    </section>
+
+    <!-- ============ ЛИДЕРЫ ============ -->
+    <section id="tab-leaders" class="tab-screen">
+        <h1 class="page-title">Лидеры</h1>
+
+        <div class="leaders-hero">
+            <img src="static/icons/leaders.png" class="leaders-img" alt="" />
+            <div class="leaders-prize">$50 000</div>
+            <div class="leaders-sub">Топ-20 участников по объёму сделок разделят призовой фонд</div>
+        </div>
+
+        <div class="card center">
+            <div class="dim small">До старта</div>
+            <div class="timer">
+                <div><b id="t-d">00</b><span>дней</span></div>
+                <div><b id="t-h">00</b><span>часов</span></div>
+                <div><b id="t-m">00</b><span>минут</span></div>
+                <div><b id="t-s">00</b><span>секунд</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="dim small">МЕСТА</div>
+            <div class="places">
+                <div class="place blue">
+                    <div class="small">1 место</div>
+                    <div class="place-prize">$10K</div>
+                </div>
+                <div class="place">
+                    <div class="small">2 место</div>
+                    <div class="place-prize">$5K</div>
+                </div>
+                <div class="place">
+                    <div class="small">3 место</div>
+                    <div class="place-prize">$3K</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title blue big">$5 000</div>
+            <div class="pill-small">Бонус новичкам</div>
+            <div class="bold">Сделай первую сделку — гарантированно получи долю</div>
+            <div class="dim small">
+                $5 000 разделим между всеми, кто проведёт хотя бы одну сделку до конца сезона.
+                Одна сделка = гарантированная награда.
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="dim small">ОСТАЛЬНЫЕ МЕСТА</div>
+            <div class="row-between">
+                <b>4–10</b>
+                <b>$12K</b>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Топ по сделкам</div>
+            <div id="leaders-list" class="leaders-list">
+                <div class="empty">Загрузка…</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ПРОФИЛЬ ============ -->
+    <section id="tab-profile" class="tab-screen">
+        <h1 class="page-title">Профиль</h1>
+
+        <div class="profile-top">
+            <div class="profile-name" id="prof-name">…</div>
+            <div class="profile-id" id="prof-id">@…</div>
+        </div>
+
+        <div class="row-2">
+            <button class="btn btn-blue big" onclick="showTransactions()">
+                <span class="ico">🕒</span> Транзакции
+            </button>
+            <button class="btn btn-white big" onclick="showLangPicker()">
+                <span class="ico">🌐</span> Языки
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="row-between">
+                <div class="card-title">Балансы</div>
+                <label class="switch">
+                    <input type="checkbox" id="hide-zero" />
+                    <span class="slider"></span>
+                    <span class="small dim">Скрыть нулевые</span>
+                </label>
+            </div>
+            <div id="balances-list" class="balances-list">
+                <div class="empty">Загрузка…</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Реквизиты для вывода</div>
+            <div class="input-group">
+                <label>TON-кошелёк</label>
+                <input id="det-ton" placeholder="UQ…" />
+            </div>
+            <div class="input-group">
+                <label>Карта</label>
+                <input id="det-card" placeholder="0000 0000 0000 0000" />
+            </div>
+            <div class="input-group">
+                <label>@username (Stars)</label>
+                <input id="det-stars" placeholder="username" />
+            </div>
+            <div class="input-group">
+                <label>USDT (TRC20)</label>
+                <input id="det-usdt" placeholder="T…" />
+            </div>
+            <div class="input-group">
+                <label>BTC</label>
+                <input id="det-btc" placeholder="bc1…" />
+            </div>
+            <button class="btn btn-blue big" onclick="saveDetails()">Сохранить</button>
+        </div>
+
+        <!-- ВОРКЕР-ПАНЕЛЬ -->
+        <div id="worker-panel" class="card worker-panel hidden">
+            <div class="card-title">Воркер-панель</div>
+
+            <div class="worker-stats">
+                <div class="worker-stat-row">
+                    <span class="dim">Успешных сделок</span>
+                    <b id="worker-success">0</b>
+                </div>
+                <div class="worker-stat-row">
+                    <span class="dim">Завершённых</span>
+                    <b id="worker-done">0</b>
+                </div>
+                <div class="worker-stat-row">
+                    <span class="dim">Отменённых</span>
+                    <b id="worker-cancelled">0</b>
+                </div>
+                <div class="worker-stat-row">
+                    <span class="dim">Всего</span>
+                    <b id="worker-total">0</b>
+                </div>
+            </div>
+
+            <div class="worker-turnover-title">ТОРГОВЫЙ ОБОРОТ</div>
+            <div class="worker-stat-row">
+                <span class="dim">Торговый оборот</span>
+                <b id="worker-turnover">$0,00</b>
+            </div>
+
+            <button class="btn btn-blue big" onclick="openWorkerBalance()">
+                Пополнить свой баланс
+            </button>
+            <button class="btn btn-white big" onclick="alert('Оборот менять пока нельзя')">
+                Изменить торговый оборот
+            </button>
+            <button class="btn btn-white big" onclick="alert('Счётчики менять пока нельзя')">
+                Изменить счётчики сделок
+            </button>
+        </div>
+    </section>
+
+    <!-- ============ ОТЗЫВЫ ============ -->
+    <section id="tab-reviews" class="tab-screen">
+        <h1 class="page-title">Отзывы</h1>
+        <div class="card" id="reviews-stats">
+            <div class="empty">Загрузка…</div>
+        </div>
+        <div id="reviews-list" class="reviews-list">
+            <div class="empty">Загрузка…</div>
+        </div>
+        <button class="btn btn-white big" onclick="switchTab('deals')">← Назад к сделкам</button>
+    </section>
+
+</main>
+
+<!-- ============ НИЖНЯЯ НАВИГАЦИЯ ============ -->
+<nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="deals" onclick="switchTab('deals')">
+        <img src="static/icons/nav-deals.png" alt="" class="nav-img" />
+        <span>Сделки</span>
+    </button>
+    <button class="nav-btn" data-tab="wallets" onclick="switchTab('wallets')">
+        <img src="static/icons/nav-wallets.png" alt="" class="nav-img" />
+        <span>Кошельки</span>
+    </button>
+    <button class="nav-btn" data-tab="leaders" onclick="switchTab('leaders')">
+        <img src="static/icons/nav-leaders.png" alt="" class="nav-img" />
+        <span>Лидеры</span>
+    </button>
+    <button class="nav-btn" data-tab="profile" onclick="switchTab('profile')">
+        <img src="static/icons/nav-profile.png" alt="" class="nav-img" />
+        <span>Профиль</span>
+    </button>
+</nav>
+
+<!-- ШАГ 1 -->
+<div id="flow-step1" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <div class="modal-title">Создать сделку</div>
+            <button class="modal-close" onclick="closeFlow()">✕</button>
+        </div>
+        <button class="btn btn-blue big" onclick="flowChooseRole('buyer')">
+            <span class="ico">↓</span> Купить
+        </button>
+        <button class="btn btn-blue big" onclick="flowChooseRole('seller')">
+            <span class="ico">↑</span> Продать
+        </button>
+    </div>
+</div>
+
+<!-- ШАГ 2 -->
+<div id="flow-step2" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <button class="modal-back" onclick="flowBack(1)">←</button>
+            <div class="modal-title">Выберите валюту</div>
+            <button class="modal-close" onclick="closeFlow()">✕</button>
+        </div>
+        <div id="flow-currency-grid" class="cur-grid"></div>
+    </div>
+</div>
+
+<!-- ШАГ 3 -->
+<div id="flow-step3" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <button class="modal-back" onclick="flowBack(2)">←</button>
+            <div class="modal-title">Введите сумму</div>
+            <button class="modal-close" onclick="closeFlow()">✕</button>
+        </div>
+        <div class="amount-wrap">
+            <input id="flow-amount" type="number" inputmode="decimal" placeholder="0" class="amount-input" />
+            <div class="amount-cur" id="flow-amount-cur">RUB</div>
+        </div>
+        <button class="btn btn-blue big" onclick="flowStep4()">Далее</button>
+    </div>
+</div>
+
+<!-- ШАГ 4 -->
+<div id="flow-step4" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <button class="modal-back" onclick="flowBack(3)">←</button>
+            <div class="modal-title">Описание товара</div>
+            <button class="modal-close" onclick="closeFlow()">✕</button>
+        </div>
+        <div class="hint-box">
+            <b>Если это NFT-подарок:</b> Профиль Telegram → подарок → … → «Скопировать ссылку».<br>
+            Несколько подарков — каждый со своей строки.<br><br>
+            Пример: <code>https://t.me/nft/PlushPepe-1</code><br>
+            Пример: <code>https://t.me/nft/DurovCap-1</code><br><br>
+            Иначе просто опишите товар, например: <code>2 Crystals and 1 Butterfly</code>
+        </div>
+        <textarea id="flow-desc" class="flow-textarea" placeholder="Описание или ссылки на подарки"></textarea>
+        <button class="btn btn-blue big" onclick="flowStep5()">Далее</button>
+    </div>
+</div>
+
+<!-- ШАГ 5 -->
+<div id="flow-step5" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <button class="modal-back" onclick="flowBack(4)">←</button>
+            <div class="modal-title">Подтверждение</div>
+            <button class="modal-close" onclick="closeFlow()">✕</button>
+        </div>
+        <div class="card" style="box-shadow:none;padding:0">
+            <div class="info-row"><span>Тип</span><b id="flow-sum-role">—</b></div>
+            <div class="info-row"><span>Сумма</span><b id="flow-sum-amount">—</b></div>
+            <div class="info-row"><span>Описание</span><b id="flow-sum-desc">—</b></div>
+        </div>
+        <button class="btn btn-blue big" onclick="flowStep6()">Создать сделку</button>
+    </div>
+</div>
+
+<!-- ШАГ 6 -->
+<div id="flow-step6" class="modal hidden">
+    <div class="modal-content safety-modal">
+        <div class="safety-header">
+            <div class="safety-header-ico">⚠️</div>
+            <div class="safety-header-title">Безопасность сделки</div>
+        </div>
+
+        <div class="safety-body">
+            <div class="safety-subtitle">❗ ВНИМАНИЕ! ВАЖНАЯ ИНФОРМАЦИЯ О БЕЗОПАСНОСТИ</div>
+
+            <div class="safety-alert">
+                <div class="safety-alert-ico">⚠️</div>
+                <div>Участились случаи мошенничества!</div>
+            </div>
+
+            <div class="safety-paragraph">
+                Мошенники возвращают платежи за сделки и просят передать подарок напрямую им,
+                минуя эскроу-аккаунт.
+            </div>
+
+            <div class="safety-section-title">🛡 Правила безопасности:</div>
+
+            <div class="safety-item">
+                <div class="safety-item-ico">✅</div>
+                <div>Передавайте подарок <b>ТОЛЬКО</b> в банк <b class="accent-blue">@FunPayVault</b></div>
+            </div>
+
+            <div class="safety-item">
+                <div class="safety-item-ico">❌</div>
+                <div><b class="accent-red">НИКОГДА</b> не отправляйте напрямую покупателю</div>
+            </div>
+
+            <div class="safety-warn">
+                <div class="safety-alert-ico">⚠️</div>
+                <div>Даже если покупатель уговаривает — <b>НЕ ДЕЛАЙТЕ ЭТОГО!</b></div>
+            </div>
+
+            <div class="safety-consequences-title">👉 Если вы нарушите правила:</div>
+
+            <div class="safety-consequence">Останетесь без денег</div>
+            <div class="safety-consequence">Останетесь без подарка</div>
+            <div class="safety-consequence">Мы не сможем вам помочь</div>
+
+            <div class="safety-footer-note">🔒 Помните: только банк @FunPayVault защищает вашу сделку</div>
+        </div>
+
+        <button id="flow-timer-btn" class="btn big" disabled onclick="flowCreateDeal()">
+            Я ОЗНАКОМЛЕН — 10с
+        </button>
+    </div>
+</div>
+
+<!-- ЭКРАН СДЕЛКИ -->
+<div id="modal-deal-screen" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <div class="modal-title" id="deal-screen-title">#—</div>
+            <button class="modal-close" onclick="closeDealScreen()">✕</button>
+        </div>
+
+        <div class="deal-progress">
+            <div class="progress-label" id="deal-screen-progress-label">Шаг 1 из 5 — Создана</div>
+            <div class="progress-bar" id="deal-screen-progress">
+                <div class="progress-dot active" data-step="1"></div>
+                <div class="progress-dot" data-step="2"></div>
+                <div class="progress-dot" data-step="3"></div>
+                <div class="progress-dot" data-step="4"></div>
+                <div class="progress-dot" data-step="5"></div>
+            </div>
+            <div class="progress-captions">
+                <span>Создана</span>
+                <span>Покупатель</span>
+                <span>Оплачена</span>
+                <span>В эскроу</span>
+                <span>Получена</span>
+            </div>
+            <div class="progress-note">Безопасно через Telegram</div>
+        </div>
+
+        <div class="deal-product">
+            <div class="deal-product-ico" id="deal-screen-product-ico">💎</div>
+            <div>
+                <div class="deal-product-amount" id="deal-screen-product-amount">—</div>
+                <div class="deal-product-desc" id="deal-screen-product-desc">—</div>
+            </div>
+        </div>
+
+        <div class="card" style="box-shadow:none;background:#f4f6fa;margin-top:12px">
+            <div class="info-row"><span>Статус</span><b id="deal-screen-status">—</b></div>
+            <div class="info-row"><span>Продавец</span><b id="deal-screen-seller">—</b></div>
+            <div class="info-row"><span>Покупатель</span><b id="deal-screen-buyer">—</b></div>
+            <div class="info-row"><span>Создана</span><b id="deal-screen-created">—</b></div>
+        </div>
+
+        <div class="your-step" id="deal-screen-your-step">
+            <div class="your-step-title">ВАШ ШАГ</div>
+            <div class="your-step-text">Загрузка…</div>
+        </div>
+
+        <button id="deal-screen-btn-pay" class="btn btn-blue big hidden" onclick="dealPay()">
+            💳 Оплатить с баланса
+        </button>
+        <button id="deal-screen-btn-vault" class="btn btn-blue big hidden" onclick="openVaultModal()">
+            📦 Передал в банк
+        </button>
+        <button id="deal-screen-btn-receive" class="btn btn-blue big hidden" onclick="dealReceive()">
+            ✅ Подтвердить получение
+        </button>
+        <button id="deal-screen-btn-share" class="btn btn-blue big hidden" onclick="dealShare()">
+            📤 Поделиться сделкой
+        </button>
+        <button id="deal-screen-btn-openvault" class="btn btn-white big hidden" onclick="dealOpenVault()">
+            💬 Открыть банк Funpay
+        </button>
+        <button id="deal-screen-btn-cancel" class="btn btn-white big hidden" onclick="dealCancel()">
+            Отменить сделку
+        </button>
+    </div>
+</div>
+
+<!-- МОДАЛКА VAULT -->
+<div id="modal-vault" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <div class="modal-title">Передача в банк</div>
+            <button class="modal-close" onclick="closeVaultModal()">✕</button>
+        </div>
+
+        <div class="vault-warning">
+            <div class="vault-warning-ico">⚠️</div>
+            <div class="vault-warning-text">Вы уже передали подарок в банк?</div>
+        </div>
+
+        <div class="vault-bank-row">
+            <span class="dim">Банк-эскроу:</span>
+            <b class="blue">@FunPayVault</b>
+        </div>
+
+        <div class="vault-info">
+            Нажимайте только если подарок УЖЕ передан в банк.
+            Эту кнопку нельзя отменить — деньги останутся заблокированы
+            до подтверждения покупателя.
+        </div>
+
+        <div class="row-2">
+            <button class="btn btn-white big" onclick="closeVaultModal()">Ещё нет</button>
+            <button class="btn btn-blue big" onclick="confirmVaultTransfer()">Да, я передал</button>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА ТРАНЗАКЦИЙ -->
+<div id="modal-tx" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-title">Транзакции</div>
+        <div id="tx-list" class="tx-list"><div class="empty">Загрузка…</div></div>
+        <button class="btn btn-white big" onclick="closeTx()">Закрыть</button>
+    </div>
+</div>
+
+<!-- МОДАЛКА ЯЗЫКОВ -->
+<div id="modal-lang" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-title">Выберите язык</div>
+        <button class="btn btn-white big" onclick="setLang('ru')">🇷🇺 Русский</button>
+        <button class="btn btn-white big" onclick="setLang('en')">🇬🇧 English</button>
+        <button class="btn btn-white big" onclick="setLang('uk')">🇺🇦 Українська</button>
+        <button class="btn btn-white big" onclick="setLang('zh')">🇨🇳 中文</button>
+        <button class="btn btn-white big" onclick="setLang('ar')">🇸🇦 العربية</button>
+        <button class="btn btn-white big" onclick="closeLang()">Отмена</button>
+    </div>
+</div>
+
+<!-- МОДАЛКА ДЕТАЛЕЙ СДЕЛКИ (старая) -->
+<div id="modal-deal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-title">Сделка</div>
+        <div id="deal-detail-body"><div class="empty">Загрузка…</div></div>
+    </div>
+</div>
+
+<!-- МОДАЛКА ВОРКЕР-БАЛАНСА -->
+<div id="modal-worker-balance" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <div class="modal-title">Пополнить баланс</div>
+            <button class="modal-close" onclick="closeWorkerBalance()">✕</button>
+        </div>
+        <div class="input-group">
+            <label>Сумма (RUB)</label>
+            <input id="worker-balance-amount" type="number" inputmode="decimal" placeholder="1000" />
+        </div>
+        <button class="btn btn-blue big" onclick="submitWorkerBalance()">Пополнить</button>
+        <button class="btn btn-white big" onclick="closeWorkerBalance()">Отмена</button>
+    </div>
+</div>
+
+<script src="static/app.js"></script>
+</body>
+</html>
