@@ -466,10 +466,8 @@ async function dealReceive() {
 function dealShare() {
     const code = state.currentDealCode;
     if (!code) return;
-    const botUser = window.__BOT_USERNAME__ || "";
-    if (!botUser) {
-        safeAlert("Не удалось получить юзернейм бота");
-        return;
+    const botUser = window.__BOT_USERNAME__ || "papagaratbot";
+    ...
     }
     const link = `https://t.me/${botUser}?start=deal_${code}`;
     try {
