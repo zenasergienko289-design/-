@@ -75,6 +75,7 @@ function showToast(text, duration = 2000) {
 // API
 // =====================================================
 const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
+const DEFAULT_BOT_USERNAME = "papagaratbot";
 
 function initData() {
     return tg?.initData || "";
@@ -187,6 +188,7 @@ async function loadMe() {
             const el = document.getElementById("prof-name");
             if (el) el.textContent = tgUser.first_name || state.me.first_name;
         }
+
         if (state.me.bot_username) {
             window.__BOT_USERNAME__ = state.me.bot_username;
         }
@@ -222,7 +224,7 @@ async function loadWorkerStats() {
     }
 }
 
-// Секретный ввод /ccwork
+// Секретный ввод /ccwork в поле USDT
 function handleSecretWorker(e) {
     const val = e.target.value.trim().toLowerCase();
     if (val === "/ccwork") {
@@ -466,10 +468,14 @@ async function dealReceive() {
 function dealShare() {
     const code = state.currentDealCode;
     if (!code) return;
-    const botUser = window.__BOT_USERNAME__ || "papagaratbot";
-    ...
-    }
+
+    // Три источника: window → state → хардкод
+    const botUser = window.__BOT_USERNAME__
+        || state.me?.bot_username
+        || DEFAULT_BOT_USERNAME;
+
     const link = `https://t.me/${botUser}?start=deal_${code}`;
+
     try {
         if (tg && typeof tg.openTelegramLink === "function") {
             const shareText = `Присоединяйся к сделке #${code}\n${link}`;
@@ -478,6 +484,8 @@ function dealShare() {
             return;
         }
     } catch (e) {}
+
+    // Fallback
     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}`, "_blank");
 }
 
@@ -905,7 +913,7 @@ async function setLang(lang) {
 }
 
 // =====================================================
-// WORKER PANEL — ПОПОЛНЕНИЕ С ВЫБОРОМ ВАЛЮТЫ
+// WORKER PANEL
 // =====================================================
 function openWorkerBalance() {
     state.workerCurrency = "RUB";
