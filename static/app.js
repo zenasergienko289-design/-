@@ -74,7 +74,7 @@ function showToast(text, duration = 2000) {
 // =====================================================
 // API
 // =====================================================
-const API = "";
+const API = "http://127.0.0.1:8000";
 
 function initData() {
     return tg?.initData || "";
