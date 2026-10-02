@@ -74,7 +74,7 @@ function showToast(text, duration = 2000) {
 // =====================================================
 // API
 // =====================================================
-const API = "http://127.0.0.1:8000";
+const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
 
 function initData() {
     return tg?.initData || "";
