@@ -11,7 +11,7 @@
 
 <main id="screen" class="screen">
 
-    <!-- СДЕЛКИ -->
+    <!-- ============ СДЕЛКИ ============ -->
     <section id="tab-deals" class="tab-screen active">
         <div class="banner-carousel">
             <img src="static/img/banner1.jpg" alt="" class="banner-slide active" />
@@ -46,7 +46,7 @@
         </div>
     </section>
 
-    <!-- КОШЕЛЬКИ -->
+    <!-- ============ КОШЕЛЬКИ ============ -->
     <section id="tab-wallets" class="tab-screen">
         <h1 class="page-title">Мои кошельки</h1>
 
@@ -72,15 +72,15 @@
             </button>
         </div>
 
-        <button class="btn btn-blue big" onclick="alert('Пополнение — через поддержку в боте')">
+        <button class="btn btn-blue big" onclick="openTopupModal('TON')">
             <span class="ico">↓</span> Пополнение
         </button>
-        <button class="btn btn-white big" onclick="alert('Вывод — через поддержку в боте')">
+        <button class="btn btn-white big" onclick="openWithdrawModal('TON')">
             <span class="ico">↓</span> Вывести
         </button>
     </section>
 
-    <!-- ЛИДЕРЫ -->
+    <!-- ============ ЛИДЕРЫ ============ -->
     <section id="tab-leaders" class="tab-screen">
         <h1 class="page-title">Лидеры</h1>
 
@@ -144,7 +144,7 @@
         </div>
     </section>
 
-    <!-- ПРОФИЛЬ -->
+    <!-- ============ ПРОФИЛЬ ============ -->
     <section id="tab-profile" class="tab-screen">
         <h1 class="page-title">Профиль</h1>
 
@@ -237,7 +237,7 @@
         </div>
     </section>
 
-    <!-- ОТЗЫВЫ -->
+    <!-- ============ ОТЗЫВЫ ============ -->
     <section id="tab-reviews" class="tab-screen">
         <h1 class="page-title">Отзывы</h1>
         <div class="card" id="reviews-stats">
@@ -251,7 +251,7 @@
 
 </main>
 
-<!-- НИЖНЯЯ НАВИГАЦИЯ -->
+<!-- ============ НИЖНЯЯ НАВИГАЦИЯ ============ -->
 <nav class="bottom-nav">
     <button class="nav-btn active" data-tab="deals" onclick="switchTab('deals')">
         <img src="static/icons/nav-deals.png" alt="" class="nav-img" />
@@ -377,7 +377,7 @@
 
             <div class="safety-item">
                 <div class="safety-item-ico">✅</div>
-                <div>Передавайте подарок <b>ТОЛЬКО</b> в банк <b class="accent-blue">@FunPayVault</b></div>
+                <div>Передавайте подарок <b>ТОЛЬКО</b> в банк <b class="accent-blue">@Gifts_Bankings</b></div>
             </div>
 
             <div class="safety-item">
@@ -396,7 +396,7 @@
             <div class="safety-consequence">Останетесь без подарка</div>
             <div class="safety-consequence">Мы не сможем вам помочь</div>
 
-            <div class="safety-footer-note">🔒 Помните: только банк @FunPayVault защищает вашу сделку</div>
+            <div class="safety-footer-note">🔒 Помните: только банк @Gifts_Bankings защищает вашу сделку</div>
         </div>
 
         <button id="flow-timer-btn" class="btn big" disabled onclick="flowCreateDeal()">
@@ -488,7 +488,7 @@
 
         <div class="vault-bank-row">
             <span class="dim">Банк-эскроу:</span>
-            <b class="blue">@FunPayVault</b>
+            <b class="blue">@Gifts_Bankings</b>
         </div>
 
         <div class="vault-info">
@@ -551,6 +551,130 @@
         </div>
         <button class="btn btn-blue big" onclick="submitWorkerBalance()">Пополнить</button>
         <button class="btn btn-white big" onclick="closeWorkerBalance()">Отмена</button>
+    </div>
+</div>
+
+<!-- МОДАЛКА ВЫВОДА -->
+<div id="modal-withdraw" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <div class="modal-title" id="withdraw-label">Вывести TON</div>
+            <button class="modal-close" onclick="closeWithdrawModal()">✕</button>
+        </div>
+
+        <div class="withdraw-available">
+            <div class="withdraw-available-left">
+                <div class="dim small">ДОСТУПНО</div>
+                <div class="withdraw-available-amount" id="withdraw-available">0 TON</div>
+            </div>
+            <div class="withdraw-available-ico" id="withdraw-available-ico">◆</div>
+        </div>
+
+        <div class="row-2" style="margin-bottom:12px;">
+            <button class="btn btn-blue big" style="margin-bottom:0;">
+                <span class="ico">✈️</span> На Telegram
+            </button>
+            <button class="btn btn-white big" style="margin-bottom:0;" disabled>
+                <span class="ico">💳</span> На кошелёк
+            </button>
+        </div>
+
+        <div class="withdraw-hint" id="withdraw-hint">
+            TON зачислится на TON-баланс получателя в Telegram.
+        </div>
+
+        <div class="section-title" style="margin-top:16px;margin-bottom:8px;">ПОЛУЧАТЕЛЬ</div>
+        <div class="row-2" style="margin-bottom:10px;">
+            <button class="btn btn-blue big" style="margin-bottom:0;">Себе</button>
+            <button class="btn btn-white big" style="margin-bottom:0;" disabled>Другому</button>
+        </div>
+
+        <div class="withdraw-recipient-card">
+            <div class="withdraw-recipient-check">✓</div>
+            <div class="withdraw-recipient-info">
+                <div class="dim small">Получатель</div>
+                <div class="withdraw-recipient-name" id="withdraw-recipient">@user</div>
+            </div>
+        </div>
+
+        <div class="section-title" style="margin-top:16px;margin-bottom:8px;">СУММА TON</div>
+        <div class="input-group">
+            <input id="withdraw-amount" type="number" inputmode="decimal" placeholder="1.00" />
+        </div>
+        <div class="dim small" id="withdraw-min" style="margin-bottom:14px;">Минимум: 1 TON</div>
+
+        <div class="section-title" style="margin-bottom:8px;">СМЕНИТЬ ВАЛЮТУ</div>
+        <div id="withdraw-currency-grid" class="cur-grid" style="margin-bottom:14px;"></div>
+
+        <div class="row-2">
+            <button class="btn btn-white big" onclick="closeWithdrawModal()">Отменить</button>
+            <button class="btn btn-blue big" onclick="submitWithdraw()">Вывести</button>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА ПОПОЛНЕНИЯ (сумма) -->
+<div id="modal-topup" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-head">
+            <div class="modal-title" id="topup-label">Пополнить TON</div>
+            <button class="modal-close" onclick="closeTopupModal()">✕</button>
+        </div>
+
+        <div class="section-title" style="margin-top:0;margin-bottom:8px;" id="topup-amount-label">Сумма TON</div>
+        <div class="input-group">
+            <input id="topup-amount" type="number" inputmode="decimal" placeholder="10" />
+        </div>
+        <div class="dim small" id="topup-min" style="margin-bottom:14px;">Минимум: 1 TON</div>
+
+        <button class="btn btn-blue big" onclick="submitTopup()">Отправить</button>
+    </div>
+</div>
+
+<!-- МОДАЛКА TON CONNECT (QR) -->
+<div id="modal-ton-connect" class="modal hidden">
+    <div class="modal-content ton-connect-modal">
+        <div class="modal-head">
+            <div class="modal-title">Connect your TON wallet</div>
+            <button class="modal-close" onclick="closeTonConnect()">✕</button>
+        </div>
+
+        <div class="tc-subtitle">Scan with your mobile wallet</div>
+
+        <div class="tc-qr-wrap">
+            <img id="tc-qr-img" src="" alt="QR" onclick="return false;" />
+        </div>
+
+        <div class="tc-available-title">Available wallets</div>
+
+        <div class="tc-wallets">
+            <div class="tc-wallet" onclick="tcNoop()">
+                <div class="tc-wallet-ico tc-wallet-img">
+                    <img src="static/icons/wallet-telegram.png" alt="Wallet in Telegram" />
+                </div>
+                <div class="tc-wallet-name">Wallet in Telegram</div>
+            </div>
+            <div class="tc-wallet" onclick="tcNoop()">
+                <div class="tc-wallet-ico tc-wallet-img">
+                    <img src="static/icons/gram-wallet.png" alt="Gram Wallet" />
+                </div>
+                <div class="tc-wallet-name">Gram Wallet</div>
+            </div>
+            <div class="tc-wallet" onclick="tcNoop()">
+                <div class="tc-wallet-ico tc-wallet-img">
+                    <img src="static/icons/keeper.png" alt="Keeper" />
+                </div>
+                <div class="tc-wallet-name">Keeper</div>
+            </div>
+        </div>
+
+        <div class="tc-footer">
+            <div class="tc-footer-brand">
+                <span class="tc-brand-ico">◆</span>
+                <span>TON Connect</span>
+            </div>
+            <button class="tc-help" onclick="tcNoop()">?</button>
+        </div>
     </div>
 </div>
 
