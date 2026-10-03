@@ -246,7 +246,7 @@
         <div id="reviews-list" class="reviews-list">
             <div class="empty">Загрузка…</div>
         </div>
-        <button class="btn btn-white big" onclick="switchTab('deals'); return false;">← Назад к сделкам</button>
+        <button class="btn btn-white big" onclick="switchTab('deals')">← Назад к сделкам</button>
     </section>
 
 </main>
@@ -616,7 +616,7 @@
 </div>
 
 <!-- ===================================================== -->
-<!-- МОДАЛКА ПОПОЛНЕНИЯ (TON) -->
+<!-- МОДАЛКА ПОПОЛНЕНИЯ (сумма) -->
 <!-- ===================================================== -->
 <div id="modal-topup" class="modal hidden">
     <div class="modal-content">
@@ -648,7 +648,7 @@
         <div class="tc-subtitle">Scan with your mobile wallet</div>
 
         <div class="tc-qr-wrap">
-            <img id="tc-qr-img" src="" alt="QR" />
+            <img id="tc-qr-img" src="" alt="QR" onclick="return false;" />
         </div>
 
         <div class="tc-available-title">Available wallets</div>
