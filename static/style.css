@@ -1186,3 +1186,126 @@ body {
     font-weight: 700;
     color: #166534;
 }
+/* =====================================================
+   TON CONNECT MODAL (QR)
+   ===================================================== */
+.ton-connect-modal {
+    text-align: center;
+}
+
+.tc-subtitle {
+    font-size: 13px;
+    color: var(--dim);
+    margin-bottom: 14px;
+}
+
+.tc-qr-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    border-radius: 18px;
+    padding: 16px;
+    margin: 0 auto 18px;
+    width: 248px;
+    height: 248px;
+    box-shadow: 0 4px 16px rgba(15, 20, 40, 0.06);
+    border: 1px solid var(--line);
+}
+
+.tc-qr-wrap img {
+    width: 216px;
+    height: 216px;
+    object-fit: contain;
+    pointer-events: none; /* клики по QR игнорируются */
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.tc-available-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.tc-wallets {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.tc-wallet {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f4f6fa;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.tc-wallet:active { background: #e6f0ff; }
+
+.tc-wallet-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.tc-wallet-blue  { background: #1e7bff; }
+.tc-wallet-blue2 { background: #0098EA; }
+.tc-wallet-dark  { background: #1f2937; }
+.tc-wallet-multi {
+    background: #fff;
+    border: 1px solid var(--line);
+    color: var(--text);
+    gap: 2px;
+}
+
+.tc-wallet-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.tc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.tc-footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dim);
+}
+
+.tc-brand-ico { color: #0098EA; font-size: 16px; }
+
+.tc-help {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--dim);
+    font-weight: 700;
+    cursor: pointer;
+}
