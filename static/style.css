@@ -1114,3 +1114,153 @@ body {
 .deal-card.clickable { cursor: pointer; }
 .deal-card.clickable:active { transform: scale(0.98); }
 .deal-detail-amount { font-size: 28px; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; }
+/* =====================================================
+   TON CONNECT MODAL (QR) — как на скрине
+   ===================================================== */
+.ton-connect-modal {
+    text-align: center;
+    background: #1c1c1e;
+    color: #fff;
+}
+
+.ton-connect-modal .modal-head .modal-title {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.ton-connect-modal .modal-close {
+    background: #2c2c2e;
+    color: #fff;
+}
+
+.tc-subtitle {
+    font-size: 13px;
+    color: #8e8e93;
+    margin-bottom: 16px;
+}
+
+.tc-qr-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    border-radius: 20px;
+    padding: 14px;
+    margin: 0 auto 22px;
+    width: 260px;
+    height: 260px;
+    position: relative;
+}
+
+.tc-qr-wrap img {
+    width: 230px;
+    height: 230px;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    border-radius: 8px;
+}
+
+.tc-qr-wrap::after {
+    /* Иконка TON по центру QR */
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    background: #0098EA url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'><circle cx='28' cy='28' r='28' fill='%230098EA'/><path d='M38.5 18h-21c-.6 0-1 .5-.9 1.1l2.4 13.6c.3 1.6 1.7 2.8 3.3 2.8h11.4c1.6 0 3-1.2 3.3-2.8l2.4-13.6c.1-.6-.3-1.1-.9-1.1zM27 33.5l-5.5-12h11L27 33.5z' fill='white'/></svg>") center/contain no-repeat;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.tc-available-title {
+    font-size: 13px;
+    color: #8e8e93;
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+.tc-wallets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.tc-wallet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.08s ease;
+}
+
+.tc-wallet:active { transform: scale(0.95); }
+
+.tc-wallet-ico {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #2c2c2e;
+}
+
+.tc-wallet-ico.tc-wallet-img {
+    background: transparent;
+}
+
+.tc-wallet-ico img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.tc-wallet-name {
+    font-size: 12px;
+    color: #fff;
+    text-align: center;
+    line-height: 1.2;
+    font-weight: 500;
+}
+
+.tc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid #2c2c2e;
+}
+
+.tc-footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.tc-brand-ico {
+    color: #0098EA;
+    font-size: 18px;
+}
+
+.tc-help {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: #2c2c2e;
+    color: #8e8e93;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+}
