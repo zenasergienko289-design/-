@@ -51,7 +51,6 @@ function showToast(text, duration = 2000, type = "success") {
     const textEl = toast.querySelector(".toast-text");
     const progressEl = toast.querySelector(".toast-progress");
 
-    // Тип: success (зелёный) или error (красный)
     if (type === "error") {
         toast.classList.add("toast-error");
         icoEl.textContent = "✕";
@@ -161,6 +160,7 @@ let state = {
     currentWallet: "TON",
     workerCurrency: "RUB",
     withdrawCurrency: "TON",
+    topupCurrency: "TON",
     flow: {
         role: null,
         currency: null,
@@ -181,11 +181,33 @@ function switchTab(tab) {
     document.querySelectorAll(".nav-btn").forEach(el => {
         el.classList.toggle("active", el.dataset.tab === tab);
     });
+
+    // BackButton: показываем только на вкладке "reviews"
+    if (tg?.BackButton) {
+        if (tab === "reviews") {
+            tg.BackButton.show();
+        } else {
+            tg.BackButton.hide();
+        }
+    }
+
     if (tab === "deals") loadDeals();
     if (tab === "leaders") loadLeaders();
     if (tab === "profile") loadProfile();
     if (tab === "wallets") loadWalletForm();
     if (tab === "reviews") loadReviews();
+}
+
+// Telegram BackButton: из отзывов → на вкладку сделок
+if (tg?.BackButton) {
+    tg.BackButton.onClick(() => {
+        const reviewsActive = document.getElementById("tab-reviews")?.classList.contains("active");
+        if (reviewsActive) {
+            switchTab("deals");
+        } else {
+            tg.BackButton.hide();
+        }
+    });
 }
 
 // =====================================================
@@ -713,10 +735,14 @@ const WITHDRAW_META = {
 };
 
 function openWithdrawModal(currency = "TON") {
-    // Проверка: минимум 2 сделки
     const dealsCount = state.me?.deals_count ?? 0;
+
+    if (dealsCount < 1) {
+        showToast("Вывод доступен от 1 сделки", 2500, "error");
+        return;
+    }
     if (dealsCount < 2) {
-        showToast("Недостаточно сделок. Нужно минимум 2", 2500, "error");
+        showToast("Вывод доступен от 2 сделок", 2500, "error");
         return;
     }
 
@@ -765,19 +791,16 @@ function renderWithdrawForm() {
         amountInput.value = "";
     }
 
-    // Доступно
     const balance = state.me?.balance ?? 0;
     const amountEl = document.getElementById("withdraw-available");
     if (amountEl) amountEl.textContent = `${balance.toFixed(0)} ${cur === "STARS" ? "STARS" : cur}`;
 
-    // Получатель — текущий юзер
     const recipientEl = document.getElementById("withdraw-recipient");
     if (recipientEl) {
         const username = state.me?.username ? `@${state.me.username}` : (state.me?.first_name || "Вы");
         recipientEl.textContent = username;
     }
 
-    // Минимум
     const minEl = document.getElementById("withdraw-min");
     if (minEl) minEl.textContent = `Минимум: ${meta.min} ${cur === "STARS" ? "STARS" : cur}`;
 }
@@ -798,7 +821,6 @@ async function submitWithdraw() {
     }
 
     try {
-        // Отправляем в API (эндпоинт /api/withdraw)
         await api("/api/withdraw", {
             method: "POST",
             body: { amount, currency: cur },
@@ -809,6 +831,108 @@ async function submitWithdraw() {
         console.error("withdraw error", e);
         showToast(e.message || "Ошибка вывода", 2500, "error");
     }
+}
+
+// =====================================================
+// TOPUP (ПОПОЛНЕНИЕ) + TON CONNECT QR
+// =====================================================
+const TOPUP_META = {
+    TON:   { label: "Пополнить TON",   placeholder: "10",    min: 1,   symbol: "TON" },
+    USDT:  { label: "Пополнить USDT",  placeholder: "10",    min: 1,   symbol: "USDT" },
+    STARS: { label: "Пополнить STARS", placeholder: "100",   min: 50,  symbol: "STARS" },
+    RUB:   { label: "Пополнить RUB",   placeholder: "1000",  min: 100, symbol: "RUB" },
+    KZT:   { label: "Пополнить KZT",   placeholder: "1000",  min: 100, symbol: "KZT" },
+    UAH:   { label: "Пополнить UAH",   placeholder: "1000",  min: 100, symbol: "UAH" },
+    USD:   { label: "Пополнить USD",   placeholder: "10",    min: 1,   symbol: "USD" },
+    BTC:   { label: "Пополнить BTC",   placeholder: "0.01",  min: 0.001, symbol: "BTC" },
+    ETH:   { label: "Пополнить ETH",   placeholder: "0.1",   min: 0.01, symbol: "ETH" },
+};
+
+function openTopupModal(currency = "TON") {
+    state.topupCurrency = currency;
+    const meta = TOPUP_META[currency] || TOPUP_META.TON;
+
+    const label = document.getElementById("topup-label");
+    if (label) label.textContent = meta.label;
+
+    const amountLabel = document.getElementById("topup-amount-label");
+    if (amountLabel) amountLabel.textContent = `Сумма ${meta.symbol}`;
+
+    const amountInput = document.getElementById("topup-amount");
+    if (amountInput) {
+        amountInput.placeholder = meta.placeholder;
+        amountInput.value = "";
+    }
+
+    const minEl = document.getElementById("topup-min");
+    if (minEl) minEl.textContent = `Минимум: ${meta.min} ${meta.symbol}`;
+
+    document.getElementById("modal-topup").classList.remove("hidden");
+}
+
+function closeTopupModal() {
+    document.getElementById("modal-topup").classList.add("hidden");
+}
+
+function submitTopup() {
+    const cur = state.topupCurrency;
+    const meta = TOPUP_META[cur] || TOPUP_META.TON;
+    const amountInput = document.getElementById("topup-amount");
+    const amount = parseFloat(amountInput?.value);
+
+    if (!amount || amount <= 0) {
+        showToast("Введите сумму больше 0", 2000, "error");
+        return;
+    }
+    if (amount < meta.min) {
+        showToast(`Минимум: ${meta.min} ${meta.symbol}`, 2000, "error");
+        return;
+    }
+
+    // закрываем окно суммы и открываем QR
+    closeTopupModal();
+    openTonConnect(amount, cur);
+}
+
+// =====================================================
+// TON CONNECT (QR) — БЕЗ ССЫЛОК, СЛУЧАЙНЫЙ QR
+// =====================================================
+function randomQrData() {
+    // Случайная строка (не ссылка)
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let s = "TONPAY-";
+    for (let i = 0; i < 28; i++) {
+        s += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return s;
+}
+
+function openTonConnect(amount, currency) {
+    const modal = document.getElementById("modal-ton-connect");
+    if (!modal) return;
+
+    // Генерируем случайный QR (картинка через публичный генератор —
+    // но БЕЗ ссылки в QR, только случайный текст)
+    const qrData = randomQrData();
+    const qrImg = document.getElementById("tc-qr-img");
+    if (qrImg) {
+        qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="
+            + encodeURIComponent(qrData);
+        qrImg.alt = "QR";
+        // на всякий случай убираем возможные ссылки
+        qrImg.onclick = (e) => e.preventDefault();
+        qrImg.style.cursor = "default";
+    }
+
+    modal.classList.remove("hidden");
+}
+
+function closeTonConnect() {
+    document.getElementById("modal-ton-connect").classList.add("hidden");
+}
+
+function tcNoop() {
+    // Ничего не делаем — по требованию
 }
 
 // =====================================================
