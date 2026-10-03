@@ -1319,3 +1319,13 @@ body {
 .toast.toast-error .toast-progress {
     background: #dc2626;
 }
+/* =====================================================
+   КРАСНЫЙ ТОСТ (error)
+   ===================================================== */
+.toast.toast-error .toast-ico {
+    background: #dc2626;
+}
+
+.toast.toast-error .toast-progress {
+    background: #dc2626;
+}
