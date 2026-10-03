@@ -84,7 +84,8 @@ function showToast(text, duration = 2000, type = "success") {
 // =====================================================
 // API
 // =====================================================
-const API = "";
+// ⚠️ УКАЖИ СВОЙ API АДРЕС (без слэша в конце)
+const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
 
 function initData() {
     return tg?.initData || "";
