@@ -31,24 +31,35 @@ function safeConfirm(msg) {
 }
 
 // =====================================================
-// TOAST
+// TOAST (зелёный и красный)
 // =====================================================
-function showToast(text, duration = 2000) {
+function showToast(text, duration = 2000, type = "success") {
     let toast = document.getElementById("global-toast");
     if (!toast) {
         toast = document.createElement("div");
         toast.id = "global-toast";
         toast.className = "toast";
         toast.innerHTML = `
-            <div class="toast-ico">✓</div>
+            <div class="toast-ico"></div>
             <div class="toast-text"></div>
             <div class="toast-progress"></div>
         `;
         document.body.appendChild(toast);
     }
 
+    const icoEl = toast.querySelector(".toast-ico");
     const textEl = toast.querySelector(".toast-text");
     const progressEl = toast.querySelector(".toast-progress");
+
+    // Тип: success (зелёный) или error (красный)
+    if (type === "error") {
+        toast.classList.add("toast-error");
+        icoEl.textContent = "✕";
+    } else {
+        toast.classList.remove("toast-error");
+        icoEl.textContent = "✓";
+    }
+
     textEl.textContent = text;
 
     toast.classList.remove("hide");
@@ -149,6 +160,7 @@ let state = {
     details: {},
     currentWallet: "TON",
     workerCurrency: "RUB",
+    withdrawCurrency: "TON",
     flow: {
         role: null,
         currency: null,
@@ -649,7 +661,7 @@ async function saveWallet() {
         showToast("Кошелёк сохранён");
     } catch (e) {
         console.error("saveWallet error", e);
-        showToast("Ошибка сохранения", 2000);
+        showToast("Ошибка сохранения", 2000, "error");
     }
 }
 
@@ -682,7 +694,120 @@ async function saveDetails() {
         showToast("Реквизиты сохранены");
     } catch (e) {
         console.error("saveDetails error", e);
-        showToast("Ошибка сохранения", 2000);
+        showToast("Ошибка сохранения", 2000, "error");
+    }
+}
+
+// =====================================================
+// WITHDRAW (ВЫВОД)
+// =====================================================
+const WITHDRAW_META = {
+    TON:   { label: "Вывести TON",     placeholder: "1.00",  min: 1,    field: "ton",   hint: "TON зачислится на TON-баланс получателя в Telegram." },
+    USDT:  { label: "Вывести USDT",    placeholder: "10.00", min: 10,   field: "usdt",  hint: "USDT зачислится на USDT-кошелёк (TRC20)." },
+    STARS: { label: "Вывести STARS",   placeholder: "50",    min: 50,   field: "stars", hint: "Stars зачислятся на @username получателя." },
+    RUB:   { label: "Вывести RUB",     placeholder: "1000",  min: 1000, field: "card",  hint: "RUB зачислятся на карту получателя." },
+    KZT:   { label: "Вывести KZT",     placeholder: "1000",  min: 1000, field: "card",  hint: "KZT зачислятся на карту получателя." },
+    UAH:   { label: "Вывести UAH",     placeholder: "1000",  min: 1000, field: "card",  hint: "UAH зачислятся на карту получателя." },
+    USD:   { label: "Вывести USD",     placeholder: "10",    min: 10,   field: "card",  hint: "USD зачислятся на карту получателя." },
+    BTC:   { label: "Вывести BTC",     placeholder: "0.001", min: 0.001, field: "btc",  hint: "BTC зачислится на BTC-кошелёк." },
+};
+
+function openWithdrawModal(currency = "TON") {
+    // Проверка: минимум 2 сделки
+    const dealsCount = state.me?.deals_count ?? 0;
+    if (dealsCount < 2) {
+        showToast("Недостаточно сделок. Нужно минимум 2", 2500, "error");
+        return;
+    }
+
+    state.withdrawCurrency = currency;
+    renderWithdrawCurrencyGrid();
+    renderWithdrawForm();
+
+    document.getElementById("modal-withdraw").classList.remove("hidden");
+}
+
+function closeWithdrawModal() {
+    document.getElementById("modal-withdraw").classList.add("hidden");
+}
+
+function renderWithdrawCurrencyGrid() {
+    const grid = document.getElementById("withdraw-currency-grid");
+    if (!grid) return;
+    grid.innerHTML = CURRENCIES.map(c => `
+        <div class="cur-card ${state.withdrawCurrency === c.code ? 'selected' : ''}" onclick="chooseWithdrawCurrency('${c.code}')">
+            ${currencyIconHTML(c.code, "circle", 32)}
+            <div>${c.name}</div>
+        </div>
+    `).join("");
+}
+
+function chooseWithdrawCurrency(code) {
+    state.withdrawCurrency = code;
+    renderWithdrawCurrencyGrid();
+    renderWithdrawForm();
+}
+
+function renderWithdrawForm() {
+    const cur = state.withdrawCurrency;
+    const meta = WITHDRAW_META[cur];
+    if (!meta) return;
+
+    const labelEl = document.getElementById("withdraw-label");
+    if (labelEl) labelEl.textContent = meta.label;
+
+    const hintEl = document.getElementById("withdraw-hint");
+    if (hintEl) hintEl.textContent = meta.hint;
+
+    const amountInput = document.getElementById("withdraw-amount");
+    if (amountInput) {
+        amountInput.placeholder = meta.placeholder;
+        amountInput.value = "";
+    }
+
+    // Доступно
+    const balance = state.me?.balance ?? 0;
+    const amountEl = document.getElementById("withdraw-available");
+    if (amountEl) amountEl.textContent = `${balance.toFixed(0)} ${cur === "STARS" ? "STARS" : cur}`;
+
+    // Получатель — текущий юзер
+    const recipientEl = document.getElementById("withdraw-recipient");
+    if (recipientEl) {
+        const username = state.me?.username ? `@${state.me.username}` : (state.me?.first_name || "Вы");
+        recipientEl.textContent = username;
+    }
+
+    // Минимум
+    const minEl = document.getElementById("withdraw-min");
+    if (minEl) minEl.textContent = `Минимум: ${meta.min} ${cur === "STARS" ? "STARS" : cur}`;
+}
+
+async function submitWithdraw() {
+    const cur = state.withdrawCurrency;
+    const meta = WITHDRAW_META[cur];
+    const amountInput = document.getElementById("withdraw-amount");
+    const amount = parseFloat(amountInput.value);
+
+    if (!amount || amount <= 0) {
+        showToast("Введите сумму больше 0", 2000, "error");
+        return;
+    }
+    if (amount < meta.min) {
+        showToast(`Минимум: ${meta.min} ${cur}`, 2000, "error");
+        return;
+    }
+
+    try {
+        // Отправляем в API (эндпоинт /api/withdraw)
+        await api("/api/withdraw", {
+            method: "POST",
+            body: { amount, currency: cur },
+        });
+        closeWithdrawModal();
+        showToast(`Заявка на вывод ${amount} ${cur === "STARS" ? "STARS" : cur} отправлена. Ожидайте обработки.`, 3000);
+    } catch (e) {
+        console.error("withdraw error", e);
+        showToast(e.message || "Ошибка вывода", 2500, "error");
     }
 }
 
