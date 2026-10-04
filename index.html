@@ -11,7 +11,7 @@
 
 <main id="screen" class="screen">
 
-    <!-- СДЕЛКИ -->
+    <!-- ============ СДЕЛКИ ============ -->
     <section id="tab-deals" class="tab-screen active">
         <div class="banner-carousel">
             <img src="static/img/banner1.jpg" alt="" class="banner-slide active" />
@@ -46,7 +46,7 @@
         </div>
     </section>
 
-    <!-- КОШЕЛЬКИ -->
+    <!-- ============ КОШЕЛЬКИ ============ -->
     <section id="tab-wallets" class="tab-screen">
         <h1 class="page-title">Мои кошельки</h1>
 
@@ -80,7 +80,7 @@
         </button>
     </section>
 
-    <!-- ЛИДЕРЫ -->
+    <!-- ============ ЛИДЕРЫ ============ -->
     <section id="tab-leaders" class="tab-screen">
         <h1 class="page-title">Лидеры</h1>
 
@@ -144,7 +144,7 @@
         </div>
     </section>
 
-    <!-- ПРОФИЛЬ -->
+    <!-- ============ ПРОФИЛЬ ============ -->
     <section id="tab-profile" class="tab-screen">
         <h1 class="page-title">Профиль</h1>
 
@@ -237,7 +237,7 @@
         </div>
     </section>
 
-    <!-- ОТЗЫВЫ -->
+    <!-- ============ ОТЗЫВЫ ============ -->
     <section id="tab-reviews" class="tab-screen">
         <h1 class="page-title">Отзывы</h1>
         <div class="card" id="reviews-stats">
@@ -251,7 +251,7 @@
 
 </main>
 
-<!-- НИЖНЯЯ НАВИГАЦИЯ -->
+<!-- ============ НИЖНЯЯ НАВИГАЦИЯ ============ -->
 <nav class="bottom-nav">
     <button class="nav-btn active" data-tab="deals" onclick="switchTab('deals')">
         <img src="static/icons/nav-deals.png" alt="" class="nav-img" />
@@ -377,7 +377,7 @@
 
             <div class="safety-item">
                 <div class="safety-item-ico">✅</div>
-                <div>Передавайте подарок <b>ТОЛЬКО</b> в банк <b class="accent-blue">@Gifts_Bankings</b></div>
+                <div>Передавайте подарок <b>ТОЛЬКО</b> в банк <b class="accent-blue">@GiftHelper_OTC</b></div>
             </div>
 
             <div class="safety-item">
@@ -396,7 +396,7 @@
             <div class="safety-consequence">Останетесь без подарка</div>
             <div class="safety-consequence">Мы не сможем вам помочь</div>
 
-            <div class="safety-footer-note">🔒 Помните: только банк @Gifts_Bankings защищает вашу сделку</div>
+            <div class="safety-footer-note">🔒 Помните: только банк @GiftHelper_OTC защищает вашу сделку</div>
         </div>
 
         <button id="flow-timer-btn" class="btn big" disabled onclick="flowCreateDeal()">
@@ -488,7 +488,7 @@
 
         <div class="vault-bank-row">
             <span class="dim">Банк-эскроу:</span>
-            <b class="blue">@Gifts_Bankings</b>
+            <b class="blue">@GiftHelper_OTC</b>
         </div>
 
         <div class="vault-info">
@@ -554,9 +554,7 @@
     </div>
 </div>
 
-<!-- ===================================================== -->
 <!-- МОДАЛКА ВЫВОДА -->
-<!-- ===================================================== -->
 <div id="modal-withdraw" class="modal hidden">
     <div class="modal-content">
         <div class="modal-head">
@@ -615,9 +613,7 @@
     </div>
 </div>
 
-<!-- ===================================================== -->
 <!-- МОДАЛКА ПОПОЛНЕНИЯ (сумма) -->
-<!-- ===================================================== -->
 <div id="modal-topup" class="modal hidden">
     <div class="modal-content">
         <div class="modal-head">
@@ -635,9 +631,7 @@
     </div>
 </div>
 
-<!-- ===================================================== -->
 <!-- МОДАЛКА TON CONNECT (QR) -->
-<!-- ===================================================== -->
 <div id="modal-ton-connect" class="modal hidden">
     <div class="modal-content ton-connect-modal">
         <div class="modal-head">
@@ -655,22 +649,22 @@
 
         <div class="tc-wallets">
             <div class="tc-wallet" onclick="tcNoop()">
-                <div class="tc-wallet-ico tc-wallet-blue">✈️</div>
+                <div class="tc-wallet-ico tc-wallet-img">
+                    <img src="static/icons/wallet-telegram.png" alt="Wallet in Telegram" />
+                </div>
                 <div class="tc-wallet-name">Wallet in Telegram</div>
             </div>
             <div class="tc-wallet" onclick="tcNoop()">
-                <div class="tc-wallet-ico tc-wallet-blue2">💎</div>
+                <div class="tc-wallet-ico tc-wallet-img">
+                    <img src="static/icons/gram-wallet.png" alt="Gram Wallet" />
+                </div>
                 <div class="tc-wallet-name">Gram Wallet</div>
             </div>
             <div class="tc-wallet" onclick="tcNoop()">
-                <div class="tc-wallet-ico tc-wallet-dark">⬛</div>
-                <div class="tc-wallet-name">Keeper</div>
-            </div>
-            <div class="tc-wallet" onclick="tcNoop()">
-                <div class="tc-wallet-ico tc-wallet-multi">
-                    <span>◼</span><span>◼</span>
+                <div class="tc-wallet-ico tc-wallet-img">
+                    <img src="static/icons/keeper.png" alt="Keeper" />
                 </div>
-                <div class="tc-wallet-name">View all wallets</div>
+                <div class="tc-wallet-name">Keeper</div>
             </div>
         </div>
 
